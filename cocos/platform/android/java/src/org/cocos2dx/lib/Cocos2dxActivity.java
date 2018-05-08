@@ -59,17 +59,17 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     // Fields
     // ===========================================================
     
-    private Cocos2dxGLSurfaceView mGLSurfaceView = null;
+    private org.cocos2dx.lib.Cocos2dxGLSurfaceView mGLSurfaceView = null;
     private int[] mGLContextAttrs = null;
-    private Cocos2dxHandler mHandler = null;   
+    private org.cocos2dx.lib.Cocos2dxHandler mHandler = null;
     private static Cocos2dxActivity sContext = null;
-    private Cocos2dxVideoHelper mVideoHelper = null;
-    private Cocos2dxWebViewHelper mWebViewHelper = null;
-    private Cocos2dxEditBoxHelper mEditBoxHelper = null;
+    private org.cocos2dx.lib.Cocos2dxVideoHelper mVideoHelper = null;
+    private org.cocos2dx.lib.Cocos2dxWebViewHelper mWebViewHelper = null;
+    private org.cocos2dx.lib.Cocos2dxEditBoxHelper mEditBoxHelper = null;
     private boolean hasFocus = false;
     private boolean showVirtualButton = false;
 
-    public Cocos2dxGLSurfaceView getGLSurfaceView(){
+    public org.cocos2dx.lib.Cocos2dxGLSurfaceView getGLSurfaceView(){
         return  mGLSurfaceView;
     }
 
@@ -125,23 +125,23 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         onLoadNativeLibraries();
 
         sContext = this;
-        this.mHandler = new Cocos2dxHandler(this);
+        this.mHandler = new org.cocos2dx.lib.Cocos2dxHandler(this);
         
-        Cocos2dxHelper.init(this);
+        org.cocos2dx.lib.Cocos2dxHelper.init(this);
         
         this.mGLContextAttrs = getGLContextAttrs();
         this.init();
 
         if (mVideoHelper == null) {
-            mVideoHelper = new Cocos2dxVideoHelper(this, mFrameLayout);
+            mVideoHelper = new org.cocos2dx.lib.Cocos2dxVideoHelper(this, mFrameLayout);
         }
         
         if(mWebViewHelper == null){
-            mWebViewHelper = new Cocos2dxWebViewHelper(mFrameLayout);
+            mWebViewHelper = new org.cocos2dx.lib.Cocos2dxWebViewHelper(mFrameLayout);
         }
 
         if(mEditBoxHelper == null){
-            mEditBoxHelper = new Cocos2dxEditBoxHelper(mFrameLayout);
+            mEditBoxHelper = new org.cocos2dx.lib.Cocos2dxEditBoxHelper(mFrameLayout);
         }
 
         Window window = this.getWindow();
@@ -150,7 +150,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         // Audio configuration
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        Cocos2dxEngineDataManager.init(this, mGLSurfaceView);
+        org.cocos2dx.lib.Cocos2dxEngineDataManager.init(this, mGLSurfaceView);
     }
 
     //native method,call GLViewImpl::getGLContextAttrs() to get the OpenGL ES context attributions
@@ -168,11 +168,11 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     protected void onResume() {
     	Log.d(TAG, "onResume()");
         super.onResume();
-        Cocos2dxAudioFocusManager.registerAudioFocusListener(this);
+//        Cocos2dxAudioFocusManager.registerAudioFocusListener(this);
         this.hideVirtualButton();
        	resumeIfHasFocus();
 
-        Cocos2dxEngineDataManager.resume();
+        org.cocos2dx.lib.Cocos2dxEngineDataManager.resume();
     }
     
     @Override
@@ -187,7 +187,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     private void resumeIfHasFocus() {
         if(hasFocus) {
             this.hideVirtualButton();
-        	Cocos2dxHelper.onResume();
+        	org.cocos2dx.lib.Cocos2dxHelper.onResume();
         	mGLSurfaceView.onResume();
         }
     }
@@ -196,25 +196,25 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     protected void onPause() {
     	Log.d(TAG, "onPause()");
         super.onPause();
-        Cocos2dxAudioFocusManager.unregisterAudioFocusListener(this);
-        Cocos2dxHelper.onPause();
+//        org.cocos2dx.lib.Cocos2dxAudioFocusManager.unregisterAudioFocusListener(this);
+        org.cocos2dx.lib.Cocos2dxHelper.onPause();
         mGLSurfaceView.onPause();
-        Cocos2dxEngineDataManager.pause();
+        org.cocos2dx.lib.Cocos2dxEngineDataManager.pause();
     }
     
     @Override
     protected void onDestroy() {
-        Cocos2dxAudioFocusManager.unregisterAudioFocusListener(this);
+//        org.cocos2dx.lib.Cocos2dxAudioFocusManager.unregisterAudioFocusListener(this);
         super.onDestroy();
 
-        Cocos2dxEngineDataManager.destroy();
+        org.cocos2dx.lib.Cocos2dxEngineDataManager.destroy();
     }
 
     @Override
     public void showDialog(final String pTitle, final String pMessage) {
         Message msg = new Message();
-        msg.what = Cocos2dxHandler.HANDLER_SHOW_DIALOG;
-        msg.obj = new Cocos2dxHandler.DialogMessage(pTitle, pMessage);
+        msg.what = org.cocos2dx.lib.Cocos2dxHandler.HANDLER_SHOW_DIALOG;
+        msg.obj = new org.cocos2dx.lib.Cocos2dxHandler.DialogMessage(pTitle, pMessage);
         this.mHandler.sendMessage(msg);
     }
     
@@ -226,7 +226,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        for (OnActivityResultListener listener : Cocos2dxHelper.getOnActivityResultListeners()) {
+        for (OnActivityResultListener listener : org.cocos2dx.lib.Cocos2dxHelper.getOnActivityResultListeners()) {
             listener.onActivityResult(requestCode, resultCode, data);
         }
 
@@ -234,7 +234,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     }
 
 
-    protected ResizeLayout mFrameLayout = null;
+    protected org.cocos2dx.lib.ResizeLayout mFrameLayout = null;
     // ===========================================================
     // Methods
     // ===========================================================
@@ -245,7 +245,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
             new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                        ViewGroup.LayoutParams.MATCH_PARENT);
 
-        mFrameLayout = new ResizeLayout(this);
+        mFrameLayout = new org.cocos2dx.lib.ResizeLayout(this);
 
         mFrameLayout.setLayoutParams(framelayout_params);
 
@@ -253,7 +253,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         ViewGroup.LayoutParams edittext_layout_params =
             new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                        ViewGroup.LayoutParams.WRAP_CONTENT);
-        Cocos2dxEditBox edittext = new Cocos2dxEditBox(this);
+        org.cocos2dx.lib.Cocos2dxEditBox edittext = new org.cocos2dx.lib.Cocos2dxEditBox(this);
         edittext.setLayoutParams(edittext_layout_params);
 
 
@@ -269,7 +269,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         if (isAndroidEmulator())
            this.mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 
-        this.mGLSurfaceView.setCocos2dxRenderer(new Cocos2dxRenderer());
+        this.mGLSurfaceView.setCocos2dxRenderer(new org.cocos2dx.lib.Cocos2dxRenderer());
         this.mGLSurfaceView.setCocos2dxEditText(edittext);
 
         // Set framelayout as the content view
@@ -277,8 +277,8 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     }
 
     
-    public Cocos2dxGLSurfaceView onCreateView() {
-        Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
+    public org.cocos2dx.lib.Cocos2dxGLSurfaceView onCreateView() {
+        org.cocos2dx.lib.Cocos2dxGLSurfaceView glSurfaceView = new org.cocos2dx.lib.Cocos2dxGLSurfaceView(this);
         //this line is need on some device if we specify an alpha bits
         if(this.mGLContextAttrs[3] > 0) glSurfaceView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
@@ -300,12 +300,12 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
             Class viewClass = View.class;
 
             try {
-                final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION");
-                final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN");
-                final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_HIDE_NAVIGATION");
-                final int SYSTEM_UI_FLAG_FULLSCREEN = Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_FULLSCREEN");
-                final int SYSTEM_UI_FLAG_IMMERSIVE_STICKY = Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_IMMERSIVE_STICKY");
-                final int SYSTEM_UI_FLAG_LAYOUT_STABLE = Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_STABLE");
+                final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = org.cocos2dx.lib.Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION");
+                final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = org.cocos2dx.lib.Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN");
+                final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = org.cocos2dx.lib.Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_HIDE_NAVIGATION");
+                final int SYSTEM_UI_FLAG_FULLSCREEN = org.cocos2dx.lib.Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_FULLSCREEN");
+                final int SYSTEM_UI_FLAG_IMMERSIVE_STICKY = org.cocos2dx.lib.Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_IMMERSIVE_STICKY");
+                final int SYSTEM_UI_FLAG_LAYOUT_STABLE = org.cocos2dx.lib.Cocos2dxReflectionHelper.<Integer>getConstantValue(viewClass, "SYSTEM_UI_FLAG_LAYOUT_STABLE");
 
                 // getWindow().getDecorView().setSystemUiVisibility();
                 final Object[] parameters = new Object[]{SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -314,7 +314,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
                         | SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
                         | SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                         | SYSTEM_UI_FLAG_IMMERSIVE_STICKY};
-                Cocos2dxReflectionHelper.<Void>invokeInstanceMethod(getWindow().getDecorView(),
+                org.cocos2dx.lib.Cocos2dxReflectionHelper.<Void>invokeInstanceMethod(getWindow().getDecorView(),
                         "setSystemUiVisibility",
                         new Class[]{Integer.TYPE},
                         parameters);
