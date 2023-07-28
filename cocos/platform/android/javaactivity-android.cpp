@@ -77,6 +77,33 @@ extern "C"
     }
 #endif // __ANDROID_API__ > 19
 
+// NOTE: Reload resources after drawing first frame to improve warm start time on Android. @Android, @WarmStart -- mz, 2023-07-28
+// One of the measurements of app quality on Google Play Console / Android Vitals
+//   is a warm start time.
+// Start time is a time measured from an app start
+//   to a moment when the first frame is completely drawn and displayed.
+// Warm start happens, for example,
+//   when the app is brought to front from memory,
+//   but app activity needs to be recreated.
+// Google expects warm start time to be less than or equal to 2 seconds.
+// One way to reproduce it is:
+//   1. Enable “Do not keep activities” as described here[1].
+//   2. Run the app
+//   3. Put it in the background
+//   4. Put it in the foreground
+// Cocos2d-x reloads all the resources during warm start right before drawing the first frame.
+// This results in too long warm start.
+//
+// This fix moves cocos2d-x resources reloading until after the first frame is drawn.
+//
+// More info:
+// - https://litegames.atlassian.net/browse/RUMMYSP-51
+// - https://litegames.atlassian.net/browse/RUMMYSP-76
+// - https://developer.android.com/topic/performance/vitals/launch-time
+// [1]: https://stackoverflow.com/a/19622671
+bool cocos2d_reload_required = false;
+bool cocos2d_reload_after_n_frames;
+
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
     JniHelper::setJavaVM(vm);
@@ -106,10 +133,8 @@ JNIEXPORT void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit(JNIEnv*  env, j
         cocos2d::GL::invalidateStateCache();
         cocos2d::GLProgramCache::getInstance()->reloadDefaultGLPrograms();
         cocos2d::DrawPrimitives::init();
-        cocos2d::VolatileTextureMgr::reloadAllTextures();
-
-        cocos2d::EventCustom recreatedEvent(EVENT_RENDERER_RECREATED);
-        director->getEventDispatcher()->dispatchEvent(&recreatedEvent);
+        cocos2d_reload_required = true;
+        cocos2d_reload_after_n_frames = 1;
         director->setGLDefaultValues();
     }
     cocos2d::network::_preloadJavaDownloaderClass();

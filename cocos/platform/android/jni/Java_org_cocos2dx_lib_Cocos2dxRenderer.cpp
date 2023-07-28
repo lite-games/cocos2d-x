@@ -30,6 +30,8 @@
 #include "platform/CCApplication.h"
 #include "platform/CCFileUtils.h"
 #include "platform/android/jni/JniHelper.h"
+#include "renderer/CCTextureCache.h"
+#include "renderer/CCRenderer.h"
 #include <jni.h>
 
 #include "base/ccUTF8.h"
@@ -38,8 +40,30 @@ using namespace cocos2d;
 
 extern "C" {
 
+    extern bool cocos2d_reload_required;
+    extern bool cocos2d_reload_after_n_frames;
+
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeRender(JNIEnv* env) {
-        cocos2d::Director::getInstance()->mainLoop();
+        // NOTE: See @Android, @WarmStart.
+        if (cocos2d_reload_required) {
+            auto director = cocos2d::Director::getInstance();
+
+            if (cocos2d_reload_after_n_frames > 0) {
+                cocos2d_reload_after_n_frames -= 1;
+            } else {
+                cocos2d::VolatileTextureMgr::reloadAllTextures();
+
+                cocos2d::EventCustom recreatedEvent(EVENT_RENDERER_RECREATED);
+                director->getEventDispatcher()->dispatchEvent(&recreatedEvent);
+                director->setGLDefaultValues();
+
+                cocos2d_reload_required = false;
+            }
+
+            director->getRenderer()->clear();
+        } else {
+            cocos2d::Director::getInstance()->mainLoop();
+        }
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnPause() {
