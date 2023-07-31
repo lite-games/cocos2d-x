@@ -41,7 +41,7 @@ using namespace cocos2d;
 extern "C" {
 
     extern bool cocos2d_reload_required;
-    extern bool cocos2d_reload_after_n_frames;
+    extern int cocos2d_reload_after_n_frames;
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeRender(JNIEnv* env) {
         // NOTE: See @Android, @WarmStart.

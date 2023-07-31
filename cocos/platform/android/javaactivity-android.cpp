@@ -77,7 +77,7 @@ extern "C"
     }
 #endif // __ANDROID_API__ > 19
 
-// NOTE: Reload resources after drawing first frame to improve warm start time on Android. @Android, @WarmStart -- mz, 2023-07-28
+// NOTE: Reload resources after drawing first frame to improve warm start time on Android. @Android, @WarmStart -- mz, 2023-07-31
 // One of the measurements of app quality on Google Play Console / Android Vitals
 //   is a warm start time.
 // Start time is a time measured from an app start
@@ -94,7 +94,7 @@ extern "C"
 // Cocos2d-x reloads all the resources during warm start right before drawing the first frame.
 // This results in too long warm start.
 //
-// This fix moves cocos2d-x resources reloading until after the first frame is drawn.
+// This fix moves cocos2d-x resources reloading until after drawing some frames.
 //
 // More info:
 // - https://litegames.atlassian.net/browse/RUMMYSP-51
@@ -102,7 +102,7 @@ extern "C"
 // - https://developer.android.com/topic/performance/vitals/launch-time
 // [1]: https://stackoverflow.com/a/19622671
 bool cocos2d_reload_required = false;
-bool cocos2d_reload_after_n_frames;
+int cocos2d_reload_after_n_frames;
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
@@ -134,7 +134,13 @@ JNIEXPORT void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit(JNIEnv*  env, j
         cocos2d::GLProgramCache::getInstance()->reloadDefaultGLPrograms();
         cocos2d::DrawPrimitives::init();
         cocos2d_reload_required = true;
-        cocos2d_reload_after_n_frames = 1;
+        // NOTE: Reload resources after drawing 2 frames. @Android, @WarmStart -- mz, 2023-07-31
+        // For some unknown reason reloading after drawing 1 frame didn't work.
+        // Logcat was still reporting very long warm start time:
+        //   Displayed com.litegames.rummy_free__aat_google/com.litegames.rummy.AppActivity: +2s287ms
+        // Reloading after 2 frames resulted in logcat reporting radically shorter warm start times:
+        //   Displayed com.litegames.rummy_free__aat_google/com.litegames.rummy.AppActivity: +263ms
+        cocos2d_reload_after_n_frames = 2;
         director->setGLDefaultValues();
     }
     cocos2d::network::_preloadJavaDownloaderClass();
