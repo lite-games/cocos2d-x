@@ -77,7 +77,7 @@ extern "C"
     }
 #endif // __ANDROID_API__ > 19
 
-// NOTE: Reload resources after drawing first frame to improve warm start time on Android. @Android, @WarmStart -- mz, 2023-07-31
+// NOTE: Reload resources after drawing first frame to improve warm start time on Android. @Android, @WarmStart -- mz, 2023-09-06
 // One of the measurements of app quality on Google Play Console / Android Vitals
 //   is a warm start time.
 // Start time is a time measured from an app start
@@ -94,12 +94,15 @@ extern "C"
 // Cocos2d-x reloads all the resources during warm start right before drawing the first frame.
 // This results in too long warm start.
 //
-// This fix moves cocos2d-x resources reloading until after drawing some frames.
+// This fix moves cocos2d-x resources reloading until after drawing some frames
+//   and split resources reloading across several frames.
 //
 // More info:
 // - https://litegames.atlassian.net/browse/RUMMYSP-51
 // - https://litegames.atlassian.net/browse/RUMMYSP-76
+// - https://litegames.atlassian.net/browse/RUMMYSP-123
 // - https://developer.android.com/topic/performance/vitals/launch-time
+//
 // [1]: https://stackoverflow.com/a/19622671
 bool cocos2d_reload_required = false;
 int cocos2d_reload_after_n_frames;

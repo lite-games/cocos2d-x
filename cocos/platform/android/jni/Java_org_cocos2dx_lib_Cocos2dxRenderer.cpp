@@ -51,13 +51,15 @@ extern "C" {
             if (cocos2d_reload_after_n_frames > 0) {
                 cocos2d_reload_after_n_frames -= 1;
             } else {
-                cocos2d::VolatileTextureMgr::reloadAllTextures();
+                auto finished = cocos2d::VolatileTextureMgr::reloadAllTexturesIncrementally();
 
-                cocos2d::EventCustom recreatedEvent(EVENT_RENDERER_RECREATED);
-                director->getEventDispatcher()->dispatchEvent(&recreatedEvent);
-                director->setGLDefaultValues();
+                if (finished) {
+                    cocos2d::EventCustom recreatedEvent(EVENT_RENDERER_RECREATED);
+                    director->getEventDispatcher()->dispatchEvent(&recreatedEvent);
+                    director->setGLDefaultValues();
 
-                cocos2d_reload_required = false;
+                    cocos2d_reload_required = false;
+                }
             }
 
             director->getRenderer()->clear();

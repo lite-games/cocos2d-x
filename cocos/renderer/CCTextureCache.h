@@ -301,13 +301,16 @@ public:
     static void setTexParameters(Texture2D *t, const Texture2D::TexParams &texParams);
     static void removeTexture(Texture2D *t);
     static void reloadAllTextures();
+    static bool reloadAllTexturesIncrementally();
 public:
     static std::list<VolatileTexture*> _textures;
     static bool _isReloading;
+    static std::list<VolatileTexture*>::iterator _textureIterator;
 private:
     // find VolatileTexture by Texture2D*
     // if not found, create a new one
     static VolatileTexture* findVolotileTexture(Texture2D *tt);
+    static void reloadTexture(VolatileTexture *vt);
     static void reloadTexture(Texture2D* texture, const std::string& filename, Texture2D::PixelFormat pixelFormat);
 };
 
