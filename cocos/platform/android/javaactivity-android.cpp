@@ -137,13 +137,13 @@ JNIEXPORT void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit(JNIEnv*  env, j
         cocos2d::GLProgramCache::getInstance()->reloadDefaultGLPrograms();
         cocos2d::DrawPrimitives::init();
         cocos2d_reload_required = true;
-        // NOTE: Reload resources after drawing 2 frames. @Android, @WarmStart -- mz, 2023-07-31
+        // NOTE: Reload resources after drawing several frames. @Android, @WarmStart -- mz, 2023-09-08
         // For some unknown reason reloading after drawing 1 frame didn't work.
         // Logcat was still reporting very long warm start time:
         //   Displayed com.litegames.rummy_free__aat_google/com.litegames.rummy.AppActivity: +2s287ms
         // Reloading after 2 frames resulted in logcat reporting radically shorter warm start times:
         //   Displayed com.litegames.rummy_free__aat_google/com.litegames.rummy.AppActivity: +263ms
-        cocos2d_reload_after_n_frames = 2;
+        cocos2d_reload_after_n_frames = 16;
         director->setGLDefaultValues();
     }
     cocos2d::network::_preloadJavaDownloaderClass();
