@@ -737,6 +737,7 @@ void TextureCache::renameTextureWithKey(const std::string& srcName, const std::s
 
 std::list<VolatileTexture*> VolatileTextureMgr::_textures;
 bool VolatileTextureMgr::_isReloading = false;
+std::list<VolatileTexture*>::iterator VolatileTextureMgr::_textureIterator;
 
 VolatileTexture::VolatileTexture(Texture2D *t)
 : _texture(t)
@@ -886,47 +887,80 @@ void VolatileTextureMgr::reloadAllTextures()
     {
         VolatileTexture *vt = texture;
 
-        switch (vt->_cashedImageType)
-        {
-        case VolatileTexture::kImageFile:
-        {
-            reloadTexture(vt->_texture, vt->_fileName, vt->_pixelFormat);
-
-            // etc1 support check whether alpha texture exists & load it
-            auto alphaFile = vt->_fileName + TextureCache::getETC1AlphaFileSuffix();
-            reloadTexture(vt->_texture->getAlphaTexture(), alphaFile, vt->_pixelFormat);
-        }
-        break;
-        case VolatileTexture::kImageData:
-        {
-            vt->_texture->initWithData(vt->_textureData,
-                vt->_dataLen,
-                vt->_pixelFormat,
-                vt->_textureSize.width,
-                vt->_textureSize.height,
-                vt->_textureSize);
-        }
-        break;
-        case VolatileTexture::kString:
-        {
-            vt->_texture->initWithString(vt->_text.c_str(), vt->_fontDefinition);
-        }
-        break;
-        case VolatileTexture::kImage:
-        {
-            vt->_texture->initWithImage(vt->_uiImage);
-        }
-        break;
-        default:
-            break;
-        }
-        if (vt->_hasMipmaps) {
-            vt->_texture->generateMipmap();
-        }
-        vt->_texture->setTexParameters(vt->_texParams);
+        reloadTexture(vt);
     }
 
     _isReloading = false;
+}
+
+// NOTE: See @Android, @WarmStart.
+bool VolatileTextureMgr::reloadAllTexturesIncrementally()
+{
+    if (!_isReloading) {
+        _isReloading = true;
+
+        // we need to release all of the glTextures to avoid collisions of texture id's when reloading the textures onto the GPU
+        for (auto& item : _textures)
+        {
+            item->_texture->releaseGLTexture();
+        }
+
+        CCLOG("reload all texture");
+
+        _textureIterator = _textures.begin();
+    } else if (_textureIterator != _textures.end()) {
+        VolatileTexture *vt = *_textureIterator;
+
+        reloadTexture(vt);
+
+        ++_textureIterator;
+    } else {
+        _isReloading = false;
+    }
+
+    return !_isReloading;
+}
+
+void VolatileTextureMgr::reloadTexture(VolatileTexture *vt)
+{
+    switch (vt->_cashedImageType)
+    {
+    case VolatileTexture::kImageFile:
+    {
+        reloadTexture(vt->_texture, vt->_fileName, vt->_pixelFormat);
+
+        // etc1 support check whether alpha texture exists & load it
+        auto alphaFile = vt->_fileName + TextureCache::getETC1AlphaFileSuffix();
+        reloadTexture(vt->_texture->getAlphaTexture(), alphaFile, vt->_pixelFormat);
+    }
+    break;
+    case VolatileTexture::kImageData:
+    {
+        vt->_texture->initWithData(vt->_textureData,
+            vt->_dataLen,
+            vt->_pixelFormat,
+            vt->_textureSize.width,
+            vt->_textureSize.height,
+            vt->_textureSize);
+    }
+    break;
+    case VolatileTexture::kString:
+    {
+        vt->_texture->initWithString(vt->_text.c_str(), vt->_fontDefinition);
+    }
+    break;
+    case VolatileTexture::kImage:
+    {
+        vt->_texture->initWithImage(vt->_uiImage);
+    }
+    break;
+    default:
+        break;
+    }
+    if (vt->_hasMipmaps) {
+        vt->_texture->generateMipmap();
+    }
+    vt->_texture->setTexParameters(vt->_texParams);
 }
 
 void VolatileTextureMgr::reloadTexture(Texture2D* texture, const std::string& filename, Texture2D::PixelFormat pixelFormat)
