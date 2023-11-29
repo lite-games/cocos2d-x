@@ -32,6 +32,7 @@
 #include "ui/UIEditBox/UIEditBox.h"
 #include <jni.h>
 #include "platform/android/jni/JniHelper.h"
+#include "platform/catch_and_rethrow_as_platform_exception.h"
 #include "2d/CCLabel.h"
 #include "base/ccUTF8.h"
 #include "math/Vec2.h"
@@ -51,17 +52,23 @@ static void editBoxEditingDidChanged(int index, const std::string& text);
 static void editBoxEditingDidEnd(int index, const std::string& text, int action);
 extern "C"{
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxEditBoxHelper_editBoxEditingDidBegin(JNIEnv *env, jclass, jint index) {
-        editBoxEditingDidBegin(index);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            editBoxEditingDidBegin(index);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxEditBoxHelper_editBoxEditingChanged(JNIEnv *env, jclass, jint index, jstring text) {
-        std::string textString = StringUtils::getStringUTFCharsJNI(env,text);
-        editBoxEditingDidChanged(index, textString);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            std::string textString = StringUtils::getStringUTFCharsJNI(env,text);
+            editBoxEditingDidChanged(index, textString);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxEditBoxHelper_editBoxEditingDidEnd(JNIEnv *env, jclass, jint index, jstring text, jint action) {
-        std::string textString = StringUtils::getStringUTFCharsJNI(env,text);
-        editBoxEditingDidEnd(index, textString, action);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            std::string textString = StringUtils::getStringUTFCharsJNI(env,text);
+            editBoxEditingDidEnd(index, textString, action);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 }
 

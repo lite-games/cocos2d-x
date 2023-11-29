@@ -153,6 +153,7 @@ set(COCOS_PLATFORM_HEADER
     platform/CCSAXParser.h
     platform/CCStdC.h
     platform/CCThread.h
+    platform/catch_and_rethrow_as_platform_exception.h
     )
 
 set(COCOS_PLATFORM_SRC
@@ -163,4 +164,5 @@ set(COCOS_PLATFORM_SRC
     platform/CCGLView.cpp
     platform/CCFileUtils.cpp
     platform/CCImage.cpp
+    platform/catch_and_rethrow_as_platform_exception.cpp
     )

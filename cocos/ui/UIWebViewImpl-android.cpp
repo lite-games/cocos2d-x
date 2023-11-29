@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string>
 #include "platform/android/jni/JniHelper.h"
+#include "platform/catch_and_rethrow_as_platform_exception.h"
 
 #include "ui/UIWebView.h"
 #include "platform/CCGLView.h"
@@ -82,10 +83,12 @@ extern "C" {
      * Signature: (ILjava/lang/String;)Z
      */
     JNIEXPORT jboolean JNICALL Java_org_cocos2dx_lib_Cocos2dxWebViewHelper_shouldStartLoading(JNIEnv *env, jclass, jint index, jstring jurl) {
-        auto charUrl = env->GetStringUTFChars(jurl, NULL);
-        std::string url = charUrl;
-        env->ReleaseStringUTFChars(jurl, charUrl);
-        return cocos2d::experimental::ui::WebViewImpl::shouldStartLoading(index, url);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            auto charUrl = env->GetStringUTFChars(jurl, NULL);
+            std::string url = charUrl;
+            env->ReleaseStringUTFChars(jurl, charUrl);
+            return cocos2d::experimental::ui::WebViewImpl::shouldStartLoading(index, url);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END_RET(env, JNI_FALSE)
     }
 
     /*
@@ -94,11 +97,13 @@ extern "C" {
      * Signature: (ILjava/lang/String;)V
      */
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxWebViewHelper_didFinishLoading(JNIEnv *env, jclass, jint index, jstring jurl) {
-        // LOGD("didFinishLoading");
-        auto charUrl = env->GetStringUTFChars(jurl, NULL);
-        std::string url = charUrl;
-        env->ReleaseStringUTFChars(jurl, charUrl);
-        cocos2d::experimental::ui::WebViewImpl::didFinishLoading(index, url);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            // LOGD("didFinishLoading");
+            auto charUrl = env->GetStringUTFChars(jurl, NULL);
+            std::string url = charUrl;
+            env->ReleaseStringUTFChars(jurl, charUrl);
+            cocos2d::experimental::ui::WebViewImpl::didFinishLoading(index, url);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     /*
@@ -107,11 +112,13 @@ extern "C" {
      * Signature: (ILjava/lang/String;)V
      */
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxWebViewHelper_didFailLoading(JNIEnv *env, jclass, jint index, jstring jurl) {
-        // LOGD("didFailLoading");
-        auto charUrl = env->GetStringUTFChars(jurl, NULL);
-        std::string url = charUrl;
-        env->ReleaseStringUTFChars(jurl, charUrl);
-        cocos2d::experimental::ui::WebViewImpl::didFailLoading(index, url);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            // LOGD("didFailLoading");
+            auto charUrl = env->GetStringUTFChars(jurl, NULL);
+            std::string url = charUrl;
+            env->ReleaseStringUTFChars(jurl, charUrl);
+            cocos2d::experimental::ui::WebViewImpl::didFailLoading(index, url);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     /*
@@ -120,11 +127,13 @@ extern "C" {
      * Signature: (ILjava/lang/String;)V
      */
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxWebViewHelper_onJsCallback(JNIEnv *env, jclass, jint index, jstring jmessage) {
-        // LOGD("jsCallback");
-        auto charMessage = env->GetStringUTFChars(jmessage, NULL);
-        std::string message = charMessage;
-        env->ReleaseStringUTFChars(jmessage, charMessage);
-        cocos2d::experimental::ui::WebViewImpl::onJsCallback(index, message);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            // LOGD("jsCallback");
+            auto charMessage = env->GetStringUTFChars(jmessage, NULL);
+            std::string message = charMessage;
+            env->ReleaseStringUTFChars(jmessage, charMessage);
+            cocos2d::experimental::ui::WebViewImpl::onJsCallback(index, message);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 }
 

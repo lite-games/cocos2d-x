@@ -24,6 +24,7 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include "platform/CCPlatformConfig.h"
+#include "platform/catch_and_rethrow_as_platform_exception.h"
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 
 #include "platform/android/CCApplication-android.h"
@@ -118,60 +119,68 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
 JNIEXPORT void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit(JNIEnv*  env, jobject thiz, jint w, jint h)
 {
-    DataManager::setProcessID(getpid());
-    DataManager::setFrameSize(w, h);
+    CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+        DataManager::setProcessID(getpid());
+        DataManager::setFrameSize(w, h);
 
-    auto director = cocos2d::Director::getInstance();
-    auto glview = director->getOpenGLView();
-    if (!glview)
-    {
-        glview = cocos2d::GLViewImpl::create("Android app");
-        glview->setFrameSize(w, h);
-        director->setOpenGLView(glview);
+        auto director = cocos2d::Director::getInstance();
+        auto glview = director->getOpenGLView();
+        if (!glview)
+        {
+            glview = cocos2d::GLViewImpl::create("Android app");
+            glview->setFrameSize(w, h);
+            director->setOpenGLView(glview);
 
-        cocos2d::Application::getInstance()->run();
-    }
-    else
-    {
-        cocos2d::GL::invalidateStateCache();
-        cocos2d::GLProgramCache::getInstance()->reloadDefaultGLPrograms();
-        cocos2d::DrawPrimitives::init();
-        cocos2d_reload_required = true;
-        // NOTE: Reload resources after drawing several frames. @Android, @WarmStart -- mz, 2023-09-08
-        // For some unknown reason reloading after drawing 1 frame didn't work.
-        // Logcat was still reporting very long warm start time:
-        //   Displayed com.litegames.rummy_free__aat_google/com.litegames.rummy.AppActivity: +2s287ms
-        // Reloading after 2 frames resulted in logcat reporting radically shorter warm start times:
-        //   Displayed com.litegames.rummy_free__aat_google/com.litegames.rummy.AppActivity: +263ms
-        cocos2d_reload_after_n_frames = 16;
-        director->setGLDefaultValues();
-    }
-    cocos2d::network::_preloadJavaDownloaderClass();
+            cocos2d::Application::getInstance()->run();
+        }
+        else
+        {
+            cocos2d::GL::invalidateStateCache();
+            cocos2d::GLProgramCache::getInstance()->reloadDefaultGLPrograms();
+            cocos2d::DrawPrimitives::init();
+            cocos2d_reload_required = true;
+            // NOTE: Reload resources after drawing several frames. @Android, @WarmStart -- mz, 2023-09-08
+            // For some unknown reason reloading after drawing 1 frame didn't work.
+            // Logcat was still reporting very long warm start time:
+            //   Displayed com.litegames.rummy_free__aat_google/com.litegames.rummy.AppActivity: +2s287ms
+            // Reloading after 2 frames resulted in logcat reporting radically shorter warm start times:
+            //   Displayed com.litegames.rummy_free__aat_google/com.litegames.rummy.AppActivity: +263ms
+            cocos2d_reload_after_n_frames = 16;
+            director->setGLDefaultValues();
+        }
+        cocos2d::network::_preloadJavaDownloaderClass();
+    CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
 }
 
 JNIEXPORT jintArray Java_org_cocos2dx_lib_Cocos2dxActivity_getGLContextAttrs(JNIEnv*  env, jobject thiz)
 {
-    cocos2d::Application::getInstance()->initGLContextAttrs(); 
-    GLContextAttrs _glContextAttrs = GLView::getGLContextAttrs();
-    
-    int tmp[7] = {_glContextAttrs.redBits, _glContextAttrs.greenBits, _glContextAttrs.blueBits,
-                           _glContextAttrs.alphaBits, _glContextAttrs.depthBits, _glContextAttrs.stencilBits, _glContextAttrs.multisamplingCount};
+    CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+        cocos2d::Application::getInstance()->initGLContextAttrs();
+        GLContextAttrs _glContextAttrs = GLView::getGLContextAttrs();
+
+        int tmp[7] = {_glContextAttrs.redBits, _glContextAttrs.greenBits, _glContextAttrs.blueBits,
+                               _glContextAttrs.alphaBits, _glContextAttrs.depthBits, _glContextAttrs.stencilBits, _glContextAttrs.multisamplingCount};
 
 
-    jintArray glContextAttrsJava = env->NewIntArray(7);
-        env->SetIntArrayRegion(glContextAttrsJava, 0, 7, tmp);
-    
-    return glContextAttrsJava;
+        jintArray glContextAttrsJava = env->NewIntArray(7);
+            env->SetIntArrayRegion(glContextAttrsJava, 0, 7, tmp);
+
+        return glContextAttrsJava;
+    CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END_RET(env, nullptr)
 }
 
 JNIEXPORT void Java_org_cocos2dx_lib_Cocos2dxAudioFocusManager_nativeOnAudioFocusChange(JNIEnv* env, jobject thiz, jint focusChange)
 {
-    cocos_audioengine_focus_change(focusChange);
+    CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+        cocos_audioengine_focus_change(focusChange);
+    CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
 }
 
 JNIEXPORT void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnSurfaceChanged(JNIEnv*  env, jobject thiz, jint w, jint h)
 {
-    cocos2d::Application::getInstance()->applicationScreenSizeChanged(w, h);
+    CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+        cocos2d::Application::getInstance()->applicationScreenSizeChanged(w, h);
+    CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
 }
 
 }

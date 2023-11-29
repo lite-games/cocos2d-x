@@ -53,6 +53,7 @@ THE SOFTWARE.
 #include "base/CCProperties.h"
 #include "base/CCRef.h"
 #include "base/CCRefPtr.h"
+#include "base/CCRuntimeError.h"
 #include "base/CCScheduler.h"
 #include "base/CCUserDefault.h"
 #include "base/CCValue.h"

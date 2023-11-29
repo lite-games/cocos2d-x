@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include "platform/android/CCFileUtils-android.h"
 #include "android/asset_manager_jni.h"
 #include "platform/android/jni/Java_org_cocos2dx_lib_Cocos2dxHelper.h"
+#include "platform/catch_and_rethrow_as_platform_exception.h"
 
 #include "base/ccUTF8.h"
 
@@ -53,33 +54,39 @@ using namespace std;
 extern "C" {
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxHelper_nativeSetContext(JNIEnv*  env, jobject thiz, jobject context, jobject assetManager) {
-        JniHelper::setClassLoaderFrom(context);
-        FileUtilsAndroid::setassetmanager(AAssetManager_fromJava(env, assetManager));
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            JniHelper::setClassLoaderFrom(context);
+            FileUtilsAndroid::setassetmanager(AAssetManager_fromJava(env, assetManager));
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxHelper_nativeSetAudioDeviceInfo(JNIEnv*  env, jobject thiz, jboolean isSupportLowLatency, jint deviceSampleRate, jint deviceAudioBufferSizeInFrames) {
-        __deviceSampleRate = deviceSampleRate;
-        __deviceAudioBufferSizeInFrames = deviceAudioBufferSizeInFrames;
-        LOGD("nativeSetAudioDeviceInfo: sampleRate: %d, bufferSizeInFrames: %d", __deviceSampleRate, __deviceAudioBufferSizeInFrames);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            __deviceSampleRate = deviceSampleRate;
+            __deviceAudioBufferSizeInFrames = deviceAudioBufferSizeInFrames;
+            LOGD("nativeSetAudioDeviceInfo: sampleRate: %d, bufferSizeInFrames: %d", __deviceSampleRate, __deviceAudioBufferSizeInFrames);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxHelper_nativeSetEditTextDialogResult(JNIEnv * env, jobject obj, jbyteArray text) {
-        jsize  size = env->GetArrayLength(text);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            jsize  size = env->GetArrayLength(text);
 
-        if (size > 0) {
-            jbyte * data = (jbyte*)env->GetByteArrayElements(text, 0);
-            char* buffer = (char*)malloc(size+1);
-            if (buffer != nullptr) {
-                memcpy(buffer, data, size);
-                buffer[size] = '\0';
-                // pass data to edittext's delegate
-                if (s_editTextCallback) s_editTextCallback(buffer, s_ctx);
-                free(buffer);
+            if (size > 0) {
+                jbyte * data = (jbyte*)env->GetByteArrayElements(text, 0);
+                char* buffer = (char*)malloc(size+1);
+                if (buffer != nullptr) {
+                    memcpy(buffer, data, size);
+                    buffer[size] = '\0';
+                    // pass data to edittext's delegate
+                    if (s_editTextCallback) s_editTextCallback(buffer, s_ctx);
+                    free(buffer);
+                }
+                env->ReleaseByteArrayElements(text, data, 0);
+            } else {
+                if (s_editTextCallback) s_editTextCallback("", s_ctx);
             }
-            env->ReleaseByteArrayElements(text, data, 0);
-        } else {
-            if (s_editTextCallback) s_editTextCallback("", s_ctx);
-        }
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
 }

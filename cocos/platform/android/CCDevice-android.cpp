@@ -25,6 +25,7 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include "platform/CCPlatformConfig.h"
+#include "platform/catch_and_rethrow_as_platform_exception.h"
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 
 #include "platform/CCDevice.h"
@@ -194,11 +195,13 @@ extern "C"
     */
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxBitmap_nativeInitBitmapDC(JNIEnv*  env, jobject thiz, int width, int height, jbyteArray pixels)
     {
-        int size = width * height * 4;
-        cocos2d::BitmapDC& bitmapDC = cocos2d::sharedBitmapDC();
-        bitmapDC._width = width;
-        bitmapDC._height = height;
-        bitmapDC._data = (unsigned char*)malloc(sizeof(unsigned char) * size);
-        env->GetByteArrayRegion(pixels, 0, size, (jbyte*)bitmapDC._data);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            int size = width * height * 4;
+            cocos2d::BitmapDC &bitmapDC = cocos2d::sharedBitmapDC();
+            bitmapDC._width = width;
+            bitmapDC._height = height;
+            bitmapDC._data = (unsigned char *) malloc(sizeof(unsigned char) * size);
+            env->GetByteArrayRegion(pixels, 0, size, (jbyte *) bitmapDC._data);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 };

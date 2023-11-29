@@ -26,6 +26,7 @@ THE SOFTWARE.
 #include "base/CCEventKeyboard.h"
 #include "base/CCEventDispatcher.h"
 #include "platform/android/CCGLViewImpl-android.h"
+#include "platform/catch_and_rethrow_as_platform_exception.h"
 
 #include <android/log.h>
 #include <jni.h>
@@ -34,47 +35,55 @@ using namespace cocos2d;
 
 extern "C" {
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesBegin(JNIEnv * env, jobject thiz, jint id, jfloat x, jfloat y) {
-        intptr_t idlong = id;
-        cocos2d::Director::getInstance()->getOpenGLView()->handleTouchesBegin(1, &idlong, &x, &y);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            intptr_t idlong = id;
+            cocos2d::Director::getInstance()->getOpenGLView()->handleTouchesBegin(1, &idlong, &x, &y);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesEnd(JNIEnv * env, jobject thiz, jint id, jfloat x, jfloat y) {
-        intptr_t idlong = id;
-        cocos2d::Director::getInstance()->getOpenGLView()->handleTouchesEnd(1, &idlong, &x, &y);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            intptr_t idlong = id;
+            cocos2d::Director::getInstance()->getOpenGLView()->handleTouchesEnd(1, &idlong, &x, &y);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesMove(JNIEnv * env, jobject thiz, jintArray ids, jfloatArray xs, jfloatArray ys) {
-        int size = env->GetArrayLength(ids);
-        jint id[size];
-        jfloat x[size];
-        jfloat y[size];
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            int size = env->GetArrayLength(ids);
+            jint id[size];
+            jfloat x[size];
+            jfloat y[size];
 
-        env->GetIntArrayRegion(ids, 0, size, id);
-        env->GetFloatArrayRegion(xs, 0, size, x);
-        env->GetFloatArrayRegion(ys, 0, size, y);
+            env->GetIntArrayRegion(ids, 0, size, id);
+            env->GetFloatArrayRegion(xs, 0, size, x);
+            env->GetFloatArrayRegion(ys, 0, size, y);
 
-        intptr_t idlong[size];
-        for(int i = 0; i < size; i++)
-            idlong[i] = id[i];
+            intptr_t idlong[size];
+            for(int i = 0; i < size; i++)
+                idlong[i] = id[i];
 
-        cocos2d::Director::getInstance()->getOpenGLView()->handleTouchesMove(size, idlong, x, y);
+            cocos2d::Director::getInstance()->getOpenGLView()->handleTouchesMove(size, idlong, x, y);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesCancel(JNIEnv * env, jobject thiz, jintArray ids, jfloatArray xs, jfloatArray ys) {
-        int size = env->GetArrayLength(ids);
-        jint id[size];
-        jfloat x[size];
-        jfloat y[size];
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            int size = env->GetArrayLength(ids);
+            jint id[size];
+            jfloat x[size];
+            jfloat y[size];
 
-        env->GetIntArrayRegion(ids, 0, size, id);
-        env->GetFloatArrayRegion(xs, 0, size, x);
-        env->GetFloatArrayRegion(ys, 0, size, y);
+            env->GetIntArrayRegion(ids, 0, size, id);
+            env->GetFloatArrayRegion(xs, 0, size, x);
+            env->GetFloatArrayRegion(ys, 0, size, y);
 
-        intptr_t idlong[size];
-        for(int i = 0; i < size; i++)
-            idlong[i] = id[i];
+            intptr_t idlong[size];
+            for(int i = 0; i < size; i++)
+                idlong[i] = id[i];
 
-        cocos2d::Director::getInstance()->getOpenGLView()->handleTouchesCancel(size, idlong, x, y);
+            cocos2d::Director::getInstance()->getOpenGLView()->handleTouchesCancel(size, idlong, x, y);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
 #define KEYCODE_BACK 0x04
@@ -102,16 +111,18 @@ extern "C" {
     };
     
     JNIEXPORT jboolean JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeKeyEvent(JNIEnv * env, jobject thiz, jint keyCode, jboolean isPressed) {
-        Director* pDirector = Director::getInstance();
-        
-        auto iterKeyCode = g_keyCodeMap.find(keyCode);
-        if (iterKeyCode == g_keyCodeMap.end()) {
-            return JNI_FALSE;
-        }
-        
-        cocos2d::EventKeyboard::KeyCode cocos2dKey = g_keyCodeMap.at(keyCode);
-        cocos2d::EventKeyboard event(cocos2dKey, isPressed);
-        cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
-        return JNI_TRUE;
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            Director* pDirector = Director::getInstance();
+
+            auto iterKeyCode = g_keyCodeMap.find(keyCode);
+            if (iterKeyCode == g_keyCodeMap.end()) {
+                return JNI_FALSE;
+            }
+
+            cocos2d::EventKeyboard::KeyCode cocos2dKey = g_keyCodeMap.at(keyCode);
+            cocos2d::EventKeyboard event(cocos2dKey, isPressed);
+            cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
+            return JNI_TRUE;
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END_RET(env, JNI_FALSE)
         
     }}

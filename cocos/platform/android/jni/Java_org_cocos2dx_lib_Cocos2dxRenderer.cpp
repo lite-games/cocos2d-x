@@ -30,6 +30,7 @@
 #include "platform/CCApplication.h"
 #include "platform/CCFileUtils.h"
 #include "platform/android/jni/JniHelper.h"
+#include "platform/catch_and_rethrow_as_platform_exception.h"
 #include "renderer/CCTextureCache.h"
 #include "renderer/CCRenderer.h"
 #include <jni.h>
@@ -44,70 +45,82 @@ extern "C" {
     extern int cocos2d_reload_after_n_frames;
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeRender(JNIEnv* env) {
-        // NOTE: See @Android, @WarmStart.
-        if (cocos2d_reload_required) {
-            auto director = cocos2d::Director::getInstance();
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            // NOTE: See @Android, @WarmStart.
+            if (cocos2d_reload_required) {
+                auto director = cocos2d::Director::getInstance();
 
-            if (cocos2d_reload_after_n_frames > 0) {
-                cocos2d_reload_after_n_frames -= 1;
-            } else {
-                auto finished = cocos2d::VolatileTextureMgr::reloadAllTexturesIncrementally();
+                if (cocos2d_reload_after_n_frames > 0) {
+                    cocos2d_reload_after_n_frames -= 1;
+                } else {
+                    auto finished = cocos2d::VolatileTextureMgr::reloadAllTexturesIncrementally();
 
-                if (finished) {
-                    cocos2d::EventCustom recreatedEvent(EVENT_RENDERER_RECREATED);
-                    director->getEventDispatcher()->dispatchEvent(&recreatedEvent);
-                    director->setGLDefaultValues();
+                    if (finished) {
+                        cocos2d::EventCustom recreatedEvent(EVENT_RENDERER_RECREATED);
+                        director->getEventDispatcher()->dispatchEvent(&recreatedEvent);
+                        director->setGLDefaultValues();
 
-                    cocos2d_reload_required = false;
+                        cocos2d_reload_required = false;
+                    }
                 }
+
+                director->getRenderer()->clear();
+            } else {
+                cocos2d::Director::getInstance()->mainLoop();
             }
-
-            director->getRenderer()->clear();
-        } else {
-            cocos2d::Director::getInstance()->mainLoop();
-        }
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
-    JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnPause() {
-        if (Director::getInstance()->getOpenGLView()) {
-                Application::getInstance()->applicationDidEnterBackground();
-                cocos2d::EventCustom backgroundEvent(EVENT_COME_TO_BACKGROUND);
-                cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&backgroundEvent);
-        }
+    JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnPause(JNIEnv* env) {
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            if (Director::getInstance()->getOpenGLView()) {
+                    Application::getInstance()->applicationDidEnterBackground();
+                    cocos2d::EventCustom backgroundEvent(EVENT_COME_TO_BACKGROUND);
+                    cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&backgroundEvent);
+            }
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
-    JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnResume() {
-        static bool firstTime = true;
-        if (Director::getInstance()->getOpenGLView()) {
-            // don't invoke at first to keep the same logic as iOS
-            // can refer to https://github.com/cocos2d/cocos2d-x/issues/14206
-            if (!firstTime)
-                Application::getInstance()->applicationWillEnterForeground();
+    JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnResume(JNIEnv* env) {
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            static bool firstTime = true;
+            if (Director::getInstance()->getOpenGLView()) {
+                // don't invoke at first to keep the same logic as iOS
+                // can refer to https://github.com/cocos2d/cocos2d-x/issues/14206
+                if (!firstTime)
+                    Application::getInstance()->applicationWillEnterForeground();
 
-            cocos2d::EventCustom foregroundEvent(EVENT_COME_TO_FOREGROUND);
-            cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&foregroundEvent);
+                cocos2d::EventCustom foregroundEvent(EVENT_COME_TO_FOREGROUND);
+                cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&foregroundEvent);
 
-            firstTime = false;
-        }
+                firstTime = false;
+            }
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInsertText(JNIEnv* env, jobject thiz, jstring text) {
-        std::string  strValue = cocos2d::StringUtils::getStringUTFCharsJNI(env, text);
-        const char* pszText = strValue.c_str();
-        cocos2d::IMEDispatcher::sharedDispatcher()->dispatchInsertText(pszText, strlen(pszText));
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            std::string  strValue = cocos2d::StringUtils::getStringUTFCharsJNI(env, text);
+            const char* pszText = strValue.c_str();
+            cocos2d::IMEDispatcher::sharedDispatcher()->dispatchInsertText(pszText, strlen(pszText));
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeDeleteBackward(JNIEnv* env, jobject thiz) {
-        cocos2d::IMEDispatcher::sharedDispatcher()->dispatchDeleteBackward();
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            cocos2d::IMEDispatcher::sharedDispatcher()->dispatchDeleteBackward();
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END(env)
     }
 
-    JNIEXPORT jstring JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeGetContentText() {
-        JNIEnv * env = 0;
+    JNIEXPORT jstring JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeGetContentText(JNIEnv* env) {
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_BEGIN
+            JNIEnv * env = 0;
 
-        if (JniHelper::getJavaVM()->GetEnv((void**)&env, JNI_VERSION_1_4) != JNI_OK || ! env) {
-            return 0;
-        }
-        std::string pszText = cocos2d::IMEDispatcher::sharedDispatcher()->getContentText();
-        return cocos2d::StringUtils::newStringUTFJNI(env, pszText);
+            if (JniHelper::getJavaVM()->GetEnv((void**)&env, JNI_VERSION_1_4) != JNI_OK || ! env) {
+                return 0;
+            }
+            std::string pszText = cocos2d::IMEDispatcher::sharedDispatcher()->getContentText();
+            return cocos2d::StringUtils::newStringUTFJNI(env, pszText);
+        CC_CATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION_END_RET(env, nullptr)
     }
 }

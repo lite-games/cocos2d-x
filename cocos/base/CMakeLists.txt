@@ -89,6 +89,8 @@ set(COCOS_BASE_HEADER
     base/CCScheduler.h
     base/CCEventType.h
     base/CCIMEDispatcher.h
+    base/CCRuntimeError.h
+    base/CCStackTrace.h
     )
 
 set(COCOS_BASE_SRC
@@ -146,6 +148,8 @@ set(COCOS_BASE_SRC
     base/etc1.cpp
     base/pvr.cpp
     base/s3tc.cpp
+    base/CCRuntimeError.cpp
+    base/CCStackTrace.cpp
     ${COCOS_BASE_SPECIFIC_SRC}
 
     )
