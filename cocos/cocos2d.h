@@ -195,6 +195,7 @@ THE SOFTWARE.
 #include "platform/CCPlatformMacros.h"
 #include "platform/CCSAXParser.h"
 #include "platform/CCThread.h"
+#include "platform/catch_and_rethrow_as_platform_exception.h"
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
     #include "platform/ios/CCApplication-ios.h"
