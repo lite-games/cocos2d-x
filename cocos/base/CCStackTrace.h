@@ -35,6 +35,9 @@ NS_CC_BEGIN
 
     // Call to stacktrace_capture() is force inlined to avoid showing it on stack traces.
     static inline __attribute__((always_inline)) StackTrace stacktrace_capture() {
+        // NOTE: libunwind tends to SIGSEGV on some Android 12 devices. -- mz, 2024-03-13
+        // The following devices are affected: Samsung Galaxy Tab S6, Samsung Galaxy Fold
+
         StackTrace stacktrace;
 
         StackTraceUnwindState state = {
