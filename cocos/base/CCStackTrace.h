@@ -8,6 +8,7 @@
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 
 #include <unwind.h>
+#include <jni.h>
 
 #endif
 
@@ -73,6 +74,8 @@ NS_CC_BEGIN
             const char *libpath,
             char *&demangledSymbolBuf
     );
+
+    jobjectArray createStackTrace(JNIEnv *env, const StackTrace &stackTrace);
 #else
     static inline __attribute__((always_inline)) StackTrace stacktrace_capture() {
         return StackTrace {.depth = 0};

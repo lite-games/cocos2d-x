@@ -149,6 +149,80 @@ NS_CC_BEGIN
         };
     }
 
+    jobjectArray createStackTrace(JNIEnv *env, const StackTrace &stackTrace) {
+        env->PushLocalFrame(
+            (jsize) (
+                // class
+                1
+                // final array
+                + 1
+                // java objects created for each stack trace element
+                + stackTrace.depth * 4
+            )
+        );
+
+        auto StackTraceElementClass = env->FindClass("java/lang/StackTraceElement");
+        auto StackTraceElementClass_Init = env->GetMethodID(
+            StackTraceElementClass,
+            "<init>",
+            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V"
+        );
+
+        auto stacktraceArray = env->NewObjectArray(
+            (jsize) stackTrace.depth,
+            StackTraceElementClass,
+            nullptr
+        );
+
+        auto demangledSymbolBuf = (char *) malloc(sizeof(char) * 256);
+        stacktrace_dump(
+            stackTrace,
+            [=, &demangledSymbolBuf]
+                (size_t idx,
+                    const void *address,
+                    const void *base_address,
+                    const char *symbol,
+                    const char *libpath) {
+                auto info = demangleSymbol(
+                    address,
+                    base_address,
+                    symbol,
+                    libpath,
+                    demangledSymbolBuf
+                );
+
+                auto declaringClass = env->NewStringUTF(info.className.c_str());
+                auto methodName = env->NewStringUTF(info.methodName.c_str());
+                // NOTE: Reporting libpath as filename resulted in bad information on Crashlytics crash report. -- mz, 2023-11-30
+                // I've tried reporting a filename from libpath, but Crashlytics treated such stacktraces
+                //   as coming from some third party library.
+                // This resulted in imprecise crash reports.
+                //   Crashlytics was able to choose the following stacktrace element:
+                //     Native.<unavailable> (address: 0x78e055abc8)
+                //   as the source of the problem instead of higher placed and more detailed:
+                //     Native.getTextOnSideThread() (address: 0x78e0559d50) (libapp.so)
+                //   just because it had a library filename attached to it.
+                auto stackTraceElement = env->NewObject(
+                    StackTraceElementClass,
+                    StackTraceElementClass_Init,
+                    declaringClass,
+                    methodName,
+                    nullptr, // unknown filename
+                    -1 // -1 means: no line number
+                );
+
+                env->SetObjectArrayElement(
+                    stacktraceArray,
+                    (jsize) idx,
+                    stackTraceElement
+                );
+            }
+        );
+        free(demangledSymbolBuf);
+
+        return (jobjectArray) env->PopLocalFrame((jobject) stacktraceArray);
+    }
+
 #endif
 
 NS_CC_END
