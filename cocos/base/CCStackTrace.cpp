@@ -165,7 +165,7 @@ NS_CC_BEGIN
                 // final array
                 + 1
                 // java objects created for each stack trace element
-                + stackTrace.depth * 4
+                + stackTrace.depth * 3
             )
         );
 
