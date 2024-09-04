@@ -59,13 +59,14 @@ NS_CC_BEGIN
             const void *base_address,
             const char *symbol,
             const char *libpath,
-            char *&demangledSymbolBuf
+            size_t &symbolBufLength,
+            char *&symbolBuf
     ) {
         int demanglingStatus = 0;
-        size_t demangledSymbolLength;
-        demangledSymbolBuf = abi::__cxa_demangle(
+        size_t demangledSymbolLength = symbolBufLength;
+        char *demangledSymbolBuf = abi::__cxa_demangle(
                 symbol,
-                demangledSymbolBuf,
+                symbolBuf,
                 &demangledSymbolLength,
                 &demanglingStatus
         );
@@ -143,6 +144,13 @@ NS_CC_BEGIN
         oss << ")";
         methodNameStr = oss.str();
 
+        // Update symbolBuf if __cxa_demangle() call has reallocated it.
+        if (demangledSymbolBuf != nullptr
+            && demangledSymbolBuf != symbolBuf) {
+            symbolBufLength = demangledSymbolLength;
+            symbolBuf = demangledSymbolBuf;
+        }
+
         return {
                 .className = classNameStr,
                 .methodName = methodNameStr,
@@ -174,10 +182,11 @@ NS_CC_BEGIN
             nullptr
         );
 
-        auto demangledSymbolBuf = (char *) malloc(sizeof(char) * 256);
+        auto demangledSymbolBufLength = (size_t) (sizeof(char) * 256);
+        auto demangledSymbolBuf = (char *) malloc(demangledSymbolBufLength);
         stacktrace_dump(
             stackTrace,
-            [=, &demangledSymbolBuf]
+            [=, &demangledSymbolBufLength, &demangledSymbolBuf]
                 (size_t idx,
                     const void *address,
                     const void *base_address,
@@ -188,6 +197,7 @@ NS_CC_BEGIN
                     base_address,
                     symbol,
                     libpath,
+                    demangledSymbolBufLength,
                     demangledSymbolBuf
                 );
 

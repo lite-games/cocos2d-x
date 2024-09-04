@@ -72,7 +72,8 @@ NS_CC_BEGIN
             const void *base_address,
             const char *symbol,
             const char *libpath,
-            char *&demangledSymbolBuf
+            size_t &symbolBufLength,
+            char *&symbolBuf
     );
 
     jobjectArray createStackTrace(JNIEnv *env, const StackTrace &stackTrace);
