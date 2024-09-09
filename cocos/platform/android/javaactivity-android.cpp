@@ -135,9 +135,6 @@ JNIEXPORT void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit(JNIEnv*  env, j
         }
         else
         {
-            cocos2d::EventCustom recreatedEvent(EVENT_RENDERER_RECREATE);
-            director->getEventDispatcher()->dispatchEvent(&recreatedEvent);
-
             cocos2d::GL::invalidateStateCache();
             cocos2d::GLProgramCache::getInstance()->reloadDefaultGLPrograms();
             cocos2d::DrawPrimitives::init();
