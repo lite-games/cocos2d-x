@@ -131,85 +131,29 @@ void GLViewImpl::setIMEKeyboardState(bool bOpen)
 }
 
 Rect GLViewImpl::getSafeAreaRect() const {
-    Rect safeAreaRect = GLView::getSafeAreaRect();
-    float deviceAspectRatio = 0;
-    if(safeAreaRect.size.height > safeAreaRect.size.width) {
-        deviceAspectRatio = safeAreaRect.size.height / safeAreaRect.size.width;
-    } else {
-        deviceAspectRatio = safeAreaRect.size.width / safeAreaRect.size.height;
-    }
+    auto safeAreaRect = GLView::getSafeAreaRect();
 
-    float marginX = DEFAULT_MARGIN_ANDROID / _scaleX;
-    float marginY = DEFAULT_MARGIN_ANDROID / _scaleY;
+    auto safeAreaInsets = JniHelper::callStaticIntArrayMethod("org/cocos2dx/lib/Cocos2dxHelper", "getSafeAreaInsetsArray");
+    if (safeAreaInsets != nullptr) {
+        auto safeAreaInsetBottom = static_cast<float>(safeAreaInsets[0]) / _scaleY;
+        auto safeAreaInsetLeft = static_cast<float>(safeAreaInsets[1]) / _scaleX;
+        auto safeAreaInsetRight = static_cast<float>(safeAreaInsets[2]) / _scaleX;
+        auto safeAreaInsetTop = static_cast<float>(safeAreaInsets[3]) / _scaleY;
 
-    bool isScreenRound = JniHelper::callStaticBooleanMethod("org/cocos2dx/lib/Cocos2dxHelper", "isScreenRound");
-    bool hasSoftKeys = JniHelper::callStaticBooleanMethod("org/cocos2dx/lib/Cocos2dxHelper", "hasSoftKeys");
-    bool isCutoutEnabled = JniHelper::callStaticBooleanMethod("org/cocos2dx/lib/Cocos2dxHelper", "isCutoutEnabled");
-
-    if(isScreenRound) {
-        // edge screen (ex. Samsung Galaxy s7, s9, s9+, Note 9, Nokia 8 Sirocco, Sony Xperia XZ3, Oppo Find X...)
-        if(safeAreaRect.size.width < safeAreaRect.size.height) {
-            safeAreaRect.origin.y += marginY * 2.f;
-            safeAreaRect.size.height -= (marginY * 2.f);
-
-            safeAreaRect.origin.x += marginX;
-            safeAreaRect.size.width -= (marginX * 2.f);
-        } else {
-            safeAreaRect.origin.y += marginY;
-            safeAreaRect.size.height -= (marginY * 2.f);
-
-            // landscape: no changes with X-coords
+        // fit safe area rect with safe insets
+        if (safeAreaInsetBottom > 0) {
+            safeAreaRect.origin.y += safeAreaInsetBottom;
+            safeAreaRect.size.height -= safeAreaInsetBottom;
         }
-    } else if (deviceAspectRatio >= WIDE_SCREEN_ASPECT_RATIO_ANDROID) {
-        // almost all devices on the market have round corners if
-        // deviceAspectRatio more than 2 (@see "android.max_aspect" parameter in AndroidManifest.xml)
-        float bottomMarginIfPortrait = 0;
-        if(hasSoftKeys) {
-            bottomMarginIfPortrait = marginY * 2.f;
+        if (safeAreaInsetLeft > 0) {
+            safeAreaRect.origin.x += safeAreaInsetLeft;
+            safeAreaRect.size.width -= safeAreaInsetLeft;
         }
-
-        if(safeAreaRect.size.width < safeAreaRect.size.height) {
-            // portrait: double margin space if device has soft menu
-            safeAreaRect.origin.y += bottomMarginIfPortrait;
-            safeAreaRect.size.height -= (bottomMarginIfPortrait + marginY);
-        } else {
-            // landscape: ignore double margin at the bottom in any cases
-            // prepare signle margin for round corners
-            safeAreaRect.origin.y += marginY;
-            safeAreaRect.size.height -= (marginY * 2.f);
+        if (safeAreaInsetRight > 0) {
+            safeAreaRect.size.width -= safeAreaInsetRight;
         }
-    } else {
-        if(hasSoftKeys && (safeAreaRect.size.width < safeAreaRect.size.height)) {
-            // portrait: preserve only for soft system menu
-            safeAreaRect.origin.y += marginY * 2.f;
-            safeAreaRect.size.height -= (marginY * 2.f);
-        }
-    }
-
-    if (isCutoutEnabled) {
-        // screen with enabled cutout area (ex. Google Pixel 3 XL, Huawei P20, Asus ZenFone 5, etc)
-        static int* safeInsets = JniHelper::callStaticIntArrayMethod("org/cocos2dx/lib/Cocos2dxHelper", "getSafeInsets");
-        if (safeInsets != nullptr) {
-            float safeInsetBottom = safeInsets[0] / _scaleY;
-            float safeInsetLeft = safeInsets[1] / _scaleX;
-            float safeInsetRight = safeInsets[2] / _scaleX;
-            float safeInsetTop = safeInsets[3] / _scaleY;
-
-            // fit safe area rect with safe insets
-            if (safeInsetBottom > 0) {
-                safeAreaRect.origin.y += safeInsetBottom;
-                safeAreaRect.size.height -= safeInsetBottom;
-            }
-            if (safeInsetLeft > 0) {
-                safeAreaRect.origin.x += safeInsetLeft;
-                safeAreaRect.size.width -= safeInsetLeft;
-            }
-            if (safeInsetRight > 0) {
-                safeAreaRect.size.width -= safeInsetRight;
-            }
-            if (safeInsetTop > 0) {
-                safeAreaRect.size.height -= safeInsetTop;
-            }
+        if (safeAreaInsetTop > 0) {
+            safeAreaRect.size.height -= safeAreaInsetTop;
         }
     }
 
