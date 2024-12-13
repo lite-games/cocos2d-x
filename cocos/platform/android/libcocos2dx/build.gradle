@@ -30,4 +30,5 @@ android {
 
 dependencies {
     implementation fileTree(dir: '../java/libs', include: ['*.jar'])
+    implementation "androidx.fragment:fragment:1.8.5"
 }

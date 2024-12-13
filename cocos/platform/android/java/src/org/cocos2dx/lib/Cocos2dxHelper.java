@@ -56,6 +56,10 @@ import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.core.view.DisplayCutoutCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
 import com.android.vending.expansion.zipfile.APKExpansionSupport;
 import com.android.vending.expansion.zipfile.ZipResourceFile;
 
@@ -770,16 +774,18 @@ public class Cocos2dxHelper {
 
         // Screens with enabled cutout area (ex. Google Pixel 3 XL, Huawei P20, Asus ZenFone 5, etc)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            DisplayCutout displayCutout = sActivity
-                .getWindow()
-                .getDecorView()
-                .getRootWindowInsets()
-                .getDisplayCutout();
-            if (displayCutout != null && !displayCutout.getBoundingRects().isEmpty()) {
-                safeAreaInsetsInPixels.left += displayCutout.getSafeInsetLeft();
-                safeAreaInsetsInPixels.right += displayCutout.getSafeInsetRight();
-                safeAreaInsetsInPixels.top += displayCutout.getSafeInsetTop();
-                safeAreaInsetsInPixels.bottom += displayCutout.getSafeInsetBottom();
+            WindowInsetsCompat rootWindowInsets = ViewCompat
+                .getRootWindowInsets(sActivity.getWindow().getDecorView());
+
+            if (rootWindowInsets != null) {
+                DisplayCutoutCompat displayCutout = rootWindowInsets
+                    .getDisplayCutout();
+                if (displayCutout != null && !displayCutout.getBoundingRects().isEmpty()) {
+                    safeAreaInsetsInPixels.left += displayCutout.getSafeInsetLeft();
+                    safeAreaInsetsInPixels.right += displayCutout.getSafeInsetRight();
+                    safeAreaInsetsInPixels.top += displayCutout.getSafeInsetTop();
+                    safeAreaInsetsInPixels.bottom += displayCutout.getSafeInsetBottom();
+                }
             }
         }
 
