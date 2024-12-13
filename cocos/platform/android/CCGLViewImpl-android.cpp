@@ -133,27 +133,34 @@ void GLViewImpl::setIMEKeyboardState(bool bOpen)
 Rect GLViewImpl::getSafeAreaRect() const {
     auto safeAreaRect = GLView::getSafeAreaRect();
 
-    auto safeAreaInsets = JniHelper::callStaticIntArrayMethod("org/cocos2dx/lib/Cocos2dxHelper", "getSafeAreaInsetsArray");
-    if (safeAreaInsets != nullptr) {
-        auto safeAreaInsetBottom = static_cast<float>(safeAreaInsets[0]) / _scaleY;
-        auto safeAreaInsetLeft = static_cast<float>(safeAreaInsets[1]) / _scaleX;
-        auto safeAreaInsetRight = static_cast<float>(safeAreaInsets[2]) / _scaleX;
-        auto safeAreaInsetTop = static_cast<float>(safeAreaInsets[3]) / _scaleY;
+    auto safeAreaInsetsInPixels = JniHelper::callStaticIntArrayMethod(
+        "org/cocos2dx/lib/Cocos2dxHelper",
+        "getSafeAreaInsetsArray"
+    );
+    if (safeAreaInsetsInPixels != nullptr) {
+        auto leftInsetInDesignPoints =
+            static_cast<float>(safeAreaInsetsInPixels[0]) / _scaleX;
+        auto rightInsetInDesignPoints =
+            static_cast<float>(safeAreaInsetsInPixels[1]) / _scaleX;
+        auto topInsetInDesignPoints =
+            static_cast<float>(safeAreaInsetsInPixels[2]) / _scaleY;
+        auto bottomInsetInDesignPoints =
+            static_cast<float>(safeAreaInsetsInPixels[3]) / _scaleY;
 
-        // fit safe area rect with safe insets
-        if (safeAreaInsetBottom > 0) {
-            safeAreaRect.origin.y += safeAreaInsetBottom;
-            safeAreaRect.size.height -= safeAreaInsetBottom;
+        // Apply insets to safe area rect
+        if (leftInsetInDesignPoints > 0) {
+            safeAreaRect.origin.x += leftInsetInDesignPoints;
+            safeAreaRect.size.width -= leftInsetInDesignPoints;
         }
-        if (safeAreaInsetLeft > 0) {
-            safeAreaRect.origin.x += safeAreaInsetLeft;
-            safeAreaRect.size.width -= safeAreaInsetLeft;
+        if (rightInsetInDesignPoints > 0) {
+            safeAreaRect.size.width -= rightInsetInDesignPoints;
         }
-        if (safeAreaInsetRight > 0) {
-            safeAreaRect.size.width -= safeAreaInsetRight;
+        if (topInsetInDesignPoints > 0) {
+            safeAreaRect.size.height -= topInsetInDesignPoints;
         }
-        if (safeAreaInsetTop > 0) {
-            safeAreaRect.size.height -= safeAreaInsetTop;
+        if (bottomInsetInDesignPoints > 0) {
+            safeAreaRect.origin.y += bottomInsetInDesignPoints;
+            safeAreaRect.size.height -= bottomInsetInDesignPoints;
         }
     }
 

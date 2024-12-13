@@ -234,49 +234,38 @@ void GLViewImpl::setIMEKeyboardState(bool open)
 
 Rect GLViewImpl::getSafeAreaRect() const
 {
+    auto safeAreaRect = GLView::getSafeAreaRect();
+
     CCEAGLView *eaglview = (CCEAGLView*) _eaglview;
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000
-    float version = [[UIDevice currentDevice].systemVersion floatValue];
-    if (version >= 11.0f)
-    {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wpartial-availability"
-        UIEdgeInsets safeAreaInsets = eaglview.safeAreaInsets;
-#pragma clang diagnostic pop
+    if (@available(iOS 11.0, *)) {
+        UIEdgeInsets safeAreaInsetsInPoints = eaglview.safeAreaInsets;
+        CGFloat contentScaleFactor = eaglview.contentScaleFactor;
 
-        // Multiply contentScaleFactor since safeAreaInsets return points.
-        safeAreaInsets.left *= eaglview.contentScaleFactor;
-        safeAreaInsets.right *= eaglview.contentScaleFactor;
-        safeAreaInsets.top *= eaglview.contentScaleFactor;
-        safeAreaInsets.bottom *= eaglview.contentScaleFactor;
+        UIEdgeInsets safeAreaInsetsInDesignPoints;
+        safeAreaInsetsInDesignPoints.left   = safeAreaInsetsInPoints.left   * contentScaleFactor / _scaleX;
+        safeAreaInsetsInDesignPoints.right  = safeAreaInsetsInPoints.right  * contentScaleFactor / _scaleX;
+        safeAreaInsetsInDesignPoints.top    = safeAreaInsetsInPoints.top    * contentScaleFactor / _scaleY;
+        safeAreaInsetsInDesignPoints.bottom = safeAreaInsetsInPoints.bottom * contentScaleFactor / _scaleY;
 
-        // Get leftBottom and rightTop point in UI coordinates
-        Vec2 leftBottom = Vec2(safeAreaInsets.left, _screenSize.height - safeAreaInsets.bottom);
-        Vec2 rightTop = Vec2(_screenSize.width - safeAreaInsets.right, safeAreaInsets.top);
-
-        // Convert a point from UI coordinates to which in design resolution coordinate.
-        leftBottom.x = (leftBottom.x - _viewPortRect.origin.x) / _scaleX,
-        leftBottom.y = (leftBottom.y - _viewPortRect.origin.y) / _scaleY;
-        rightTop.x = (rightTop.x - _viewPortRect.origin.x) / _scaleX,
-        rightTop.y = (rightTop.y - _viewPortRect.origin.y) / _scaleY;
-
-        // Adjust points to make them inside design resolution
-        leftBottom.x = MAX(leftBottom.x, 0);
-        leftBottom.y = MIN(leftBottom.y, _designResolutionSize.height);
-        rightTop.x = MIN(rightTop.x, _designResolutionSize.width);
-        rightTop.y = MAX(rightTop.y, 0);
-
-        // Convert to GL coordinates
-        leftBottom = Director::getInstance()->convertToGL(leftBottom);
-        rightTop = Director::getInstance()->convertToGL(rightTop);
-
-        return Rect(leftBottom.x, leftBottom.y, rightTop.x - leftBottom.x, rightTop.y - leftBottom.y);
+        // Apply insets to safe area rect
+        if (safeAreaInsetsInDesignPoints.left > 0) {
+            safeAreaRect.origin.x    += safeAreaInsetsInDesignPoints.left;
+            safeAreaRect.size.width  -= safeAreaInsetsInDesignPoints.left;
+        }
+        if (safeAreaInsetsInDesignPoints.right > 0) {
+            safeAreaRect.size.width  -= safeAreaInsetsInDesignPoints.right;
+        }
+        if (safeAreaInsetsInDesignPoints.top > 0) {
+            safeAreaRect.size.height -= safeAreaInsetsInDesignPoints.top;
+        }
+        if (safeAreaInsetsInDesignPoints.bottom > 0) {
+            safeAreaRect.origin.y    += safeAreaInsetsInDesignPoints.bottom;
+            safeAreaRect.size.height -= safeAreaInsetsInDesignPoints.bottom;
+        }
     }
-#endif
 
-    // If running on iOS devices lower than 11.0, return visiable rect instead.
-    return GLView::getSafeAreaRect();
+    return safeAreaRect;
 }
 
 NS_CC_END

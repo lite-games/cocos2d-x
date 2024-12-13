@@ -761,48 +761,45 @@ public class Cocos2dxHelper {
     }
 
     /**
-     * Returns safe area insets rect.
+     * Returns safe area insets rect in pixels.
      *
      * @return safe area insets rect
      */
     public static Rect getSafeAreaInsets() {
-        Rect safeAreaInsets = new Rect();
+        Rect safeAreaInsetsInPixels = new Rect();
 
         // Screens with enabled cutout area (ex. Google Pixel 3 XL, Huawei P20, Asus ZenFone 5, etc)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            Window cocosWindow = sActivity.getWindow();
-            DisplayCutout displayCutout = cocosWindow.getDecorView()
+            DisplayCutout displayCutout = sActivity
+                .getWindow()
+                .getDecorView()
                 .getRootWindowInsets()
                 .getDisplayCutout();
-            if (displayCutout != null) {
-                List<Rect> rects = displayCutout.getBoundingRects();
-                // Judge whether it is cutouts (aka notch) screen phone by judge cutout rects is null or zero size
-                if (!rects.isEmpty()) {
-                    safeAreaInsets.bottom += displayCutout.getSafeInsetBottom();
-                    safeAreaInsets.left += displayCutout.getSafeInsetLeft();
-                    safeAreaInsets.right += displayCutout.getSafeInsetRight();
-                    safeAreaInsets.top += displayCutout.getSafeInsetTop();
-                }
+            if (displayCutout != null && !displayCutout.getBoundingRects().isEmpty()) {
+                safeAreaInsetsInPixels.left += displayCutout.getSafeInsetLeft();
+                safeAreaInsetsInPixels.right += displayCutout.getSafeInsetRight();
+                safeAreaInsetsInPixels.top += displayCutout.getSafeInsetTop();
+                safeAreaInsetsInPixels.bottom += displayCutout.getSafeInsetBottom();
             }
         }
 
-        return safeAreaInsets;
+        return safeAreaInsetsInPixels;
     }
 
     /**
-     * Returns safe area insets array.
+     * Returns safe area insets in pixels.
      *
-     * @return array of int with safe insets values
+     * @return safe area insets array
      */
     @SuppressLint("NewApi") 
     public static int[] getSafeAreaInsetsArray() {
         Rect safeAreaInsets = getSafeAreaInsets();
 
         return new int[] {
-            safeAreaInsets.bottom,
             safeAreaInsets.left,
             safeAreaInsets.right,
             safeAreaInsets.top,
+            safeAreaInsets.bottom,
         };
     }
 
