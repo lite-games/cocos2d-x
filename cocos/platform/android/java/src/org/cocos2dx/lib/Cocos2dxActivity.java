@@ -266,6 +266,8 @@ public abstract class Cocos2dxActivity extends FragmentActivity implements Cocos
 
         mFrameLayout = new ResizeLayout(this);
 
+        mFrameLayout.setId(View.generateViewId());
+
         mFrameLayout.setLayoutParams(framelayout_params);
 
         // Cocos2dxEditText layout
