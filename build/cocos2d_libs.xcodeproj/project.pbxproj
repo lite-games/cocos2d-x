@@ -660,10 +660,7 @@
 		15FB209D1AE7C57D00C31518 /* sweep_context.h in Headers */ = {isa = PBXBuildFile; fileRef = 15FB20861AE7C57D00C31518 /* sweep_context.h */; };
 		15FB209E1AE7C57D00C31518 /* sweep_context.h in Headers */ = {isa = PBXBuildFile; fileRef = 15FB20861AE7C57D00C31518 /* sweep_context.h */; };
 		180890A12B1726EE008BAAAE /* CCRuntimeError.h in Headers */ = {isa = PBXBuildFile; fileRef = 1808909F2B1726EE008BAAAE /* CCRuntimeError.h */; };
-		180890A22B1726EE008BAAAE /* CCRuntimeError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 180890A02B1726EE008BAAAE /* CCRuntimeError.cpp */; };
-		180890A32B1728FA008BAAAE /* CCRuntimeError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 180890A02B1726EE008BAAAE /* CCRuntimeError.cpp */; };
 		180890A42B1728FA008BAAAE /* CCRuntimeError.h in Headers */ = {isa = PBXBuildFile; fileRef = 1808909F2B1726EE008BAAAE /* CCRuntimeError.h */; };
-		180890A52B1728FA008BAAAE /* CCRuntimeError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 180890A02B1726EE008BAAAE /* CCRuntimeError.cpp */; };
 		180890A62B1728FA008BAAAE /* CCRuntimeError.h in Headers */ = {isa = PBXBuildFile; fileRef = 1808909F2B1726EE008BAAAE /* CCRuntimeError.h */; };
 		180890AA2B18968E008BAAAE /* CCStackTrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 180890A82B18968D008BAAAE /* CCStackTrace.cpp */; };
 		180890AB2B18968E008BAAAE /* CCStackTrace.h in Headers */ = {isa = PBXBuildFile; fileRef = 180890A92B18968D008BAAAE /* CCStackTrace.h */; };
@@ -4566,7 +4563,6 @@
 		15FB20851AE7C57D00C31518 /* sweep_context.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sweep_context.cc; sourceTree = "<group>"; };
 		15FB20861AE7C57D00C31518 /* sweep_context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sweep_context.h; sourceTree = "<group>"; };
 		1808909F2B1726EE008BAAAE /* CCRuntimeError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CCRuntimeError.h; path = ../base/CCRuntimeError.h; sourceTree = "<group>"; };
-		180890A02B1726EE008BAAAE /* CCRuntimeError.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CCRuntimeError.cpp; path = ../base/CCRuntimeError.cpp; sourceTree = "<group>"; };
 		180890A82B18968D008BAAAE /* CCStackTrace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CCStackTrace.cpp; path = ../base/CCStackTrace.cpp; sourceTree = "<group>"; };
 		180890A92B18968D008BAAAE /* CCStackTrace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CCStackTrace.h; path = ../base/CCStackTrace.h; sourceTree = "<group>"; };
 		180890B02B18A3BC008BAAAE /* catch_and_rethrow_as_platform_exception.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = catch_and_rethrow_as_platform_exception.cpp; sourceTree = "<group>"; };
@@ -6574,7 +6570,6 @@
 				50ABBDFE1925AB6E00A911A9 /* CCRef.cpp */,
 				50ABBDFF1925AB6E00A911A9 /* CCRef.h */,
 				50ABBE001925AB6E00A911A9 /* CCRefPtr.h */,
-				180890A02B1726EE008BAAAE /* CCRuntimeError.cpp */,
 				1808909F2B1726EE008BAAAE /* CCRuntimeError.h */,
 				50ABBE011925AB6E00A911A9 /* CCScheduler.cpp */,
 				50ABBE021925AB6E00A911A9 /* CCScheduler.h */,
@@ -12017,7 +12012,6 @@
 				50ABBEAF1925AB6F00A911A9 /* CCUserDefault.cpp in Sources */,
 				15AE1BCB19AAE01E00C27E9E /* CCControlButton.cpp in Sources */,
 				50ABBE791925AB6F00A911A9 /* CCEventMouse.cpp in Sources */,
-				180890A22B1726EE008BAAAE /* CCRuntimeError.cpp in Sources */,
 				A05DCF9D1B90584E00EE040B /* CCDownloader-curl.cpp in Sources */,
 				50ABC0111926664800A911A9 /* CCGLView.cpp in Sources */,
 				50ABBE3D1925AB6F00A911A9 /* CCDataVisitor.cpp in Sources */,
@@ -12834,7 +12828,6 @@
 				507B3C551C31BDD30067B53E /* HttpAsynConnection-apple.m in Sources */,
 				507B3C561C31BDD30067B53E /* RecastDump.cpp in Sources */,
 				507B3C571C31BDD30067B53E /* CCPUCircleEmitter.cpp in Sources */,
-				180890A52B1728FA008BAAAE /* CCRuntimeError.cpp in Sources */,
 				507B3C581C31BDD30067B53E /* UITextAtlas.cpp in Sources */,
 				507B3C591C31BDD30067B53E /* CCProcessBase.cpp in Sources */,
 				507B3C5A1C31BDD30067B53E /* DetourAlloc.cpp in Sources */,
@@ -13507,7 +13500,6 @@
 				50ABBE521925AB6F00A911A9 /* CCEventDispatcher.cpp in Sources */,
 				A045F6D71BA81577005076C7 /* CCTextureCube.cpp in Sources */,
 				52B47A2F1A5349A3004E4C60 /* HttpAsynConnection-apple.m in Sources */,
-				180890A32B1728FA008BAAAE /* CCRuntimeError.cpp in Sources */,
 				B6DD2FB41B04825B00E47F5F /* RecastDump.cpp in Sources */,
 				B665E23B1AA80A6500DDB1C5 /* CCPUCircleEmitter.cpp in Sources */,
 				15AE1B8019AADA9A00C27E9E /* UITextAtlas.cpp in Sources */,

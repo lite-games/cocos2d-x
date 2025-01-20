@@ -48,6 +48,7 @@ NS_CC_BEGIN
     static jthrowable createJavaException(
             JNIEnv *env,
             const char *msg,
+            jthrowable jThrowable,
             const StackTrace &stackTrace,
             jthrowable cause,
             bool keepJavaStackTrace
@@ -79,37 +80,65 @@ NS_CC_BEGIN
 
         auto nativeStackTrace = createStackTrace(env, stackTrace);
 
-        auto exceptionMessage = env->NewStringUTF(msg);
-        auto javaException = (jthrowable) env->NewObject(
+        jthrowable javaException;
+        if (jThrowable) {
+            // Java exception coming from JNI should always be the main cause.
+            assert(cause == nullptr);
+
+            javaException = jThrowable;
+
+            // append native stacktrace to java stacktrace
+            auto javaStackTrace = (jobjectArray) env->CallObjectMethod(
+                javaException,
+                RuntimeExceptionClass_getStackTraceMethod
+            );
+
+            auto finalStackTrace = concatenateArrays(
+                env,
+                StackTraceElementClass,
+                {javaStackTrace, nativeStackTrace}
+            );
+
+            env->CallVoidMethod(
+                javaException,
+                RuntimeExceptionClass_setStackTraceMethod,
+                finalStackTrace
+            );
+        } else {
+            auto exceptionMessage = env->NewStringUTF(msg);
+            javaException = (jthrowable) env->NewObject(
                 RuntimeExceptionClass,
                 RuntimeExceptionClass_Init,
                 exceptionMessage,
                 cause
-        );
-
-        if (keepJavaStackTrace) {
-            auto javaStackTrace = (jobjectArray) env->CallObjectMethod(
-                    javaException,
-                    RuntimeExceptionClass_getStackTraceMethod
             );
 
-            auto finalStackTrace = concatenateArrays(
+            if (keepJavaStackTrace) {
+                // append java stack trace to native stacktrace
+                auto javaStackTrace = (jobjectArray) env->CallObjectMethod(
+                    javaException,
+                    RuntimeExceptionClass_getStackTraceMethod
+                );
+
+                auto finalStackTrace = concatenateArrays(
                     env,
                     StackTraceElementClass,
                     {nativeStackTrace, javaStackTrace}
-            );
+                );
 
-            env->CallVoidMethod(
+                env->CallVoidMethod(
                     javaException,
                     RuntimeExceptionClass_setStackTraceMethod,
                     finalStackTrace
-            );
-        } else {
-            env->CallVoidMethod(
+                );
+            } else {
+                // report only native stacktrace
+                env->CallVoidMethod(
                     javaException,
                     RuntimeExceptionClass_setStackTraceMethod,
                     nativeStackTrace
-            );
+                );
+            }
         }
 
         return (jthrowable) env->PopLocalFrame(javaException);
@@ -118,6 +147,9 @@ NS_CC_BEGIN
     static jthrowable createJavaException(JNIEnv *env, const std::exception_ptr &exPtr) {
         struct ExceptionInfo {
             std::string msg;
+            #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+            jthrowable jThrowable;
+            #endif
             StackTrace stackTrace;
         };
 
@@ -128,10 +160,15 @@ NS_CC_BEGIN
                 std::rethrow_exception(exceptionPtr);
             } catch (const RuntimeError &ex) {
                 exceptionStack.push_back(
-                        ExceptionInfo{
-                                .msg = ex.what(),
-                                .stackTrace = ex.getStackTrace(),
-                        }
+                    ExceptionInfo{
+                        .msg = ex.what(),
+                        #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+                        .jThrowable = ex.getThrowable(),
+                        #else
+                        .jThrowable = nullptr,
+                        #endif
+                        .stackTrace = ex.getStackTrace(),
+                    }
                 );
 
                 try {
@@ -142,10 +179,11 @@ NS_CC_BEGIN
                 }
             } catch (const std::exception &ex) {
                 exceptionStack.push_back(
-                        ExceptionInfo{
-                                .msg = ex.what(),
-                                .stackTrace = StackTrace{.depth = 0},
-                        }
+                    ExceptionInfo{
+                        .msg = ex.what(),
+                        .jThrowable = nullptr,
+                        .stackTrace = StackTrace{.depth = 0},
+                    }
                 );
 
                 try {
@@ -156,10 +194,11 @@ NS_CC_BEGIN
                 }
             } catch (const std::string &ex) {
                 exceptionStack.push_back(
-                        ExceptionInfo{
-                                .msg = ex,
-                                .stackTrace = StackTrace{.depth = 0},
-                        }
+                    ExceptionInfo{
+                        .msg = ex,
+                        .jThrowable = nullptr,
+                        .stackTrace = StackTrace{.depth = 0},
+                    }
                 );
 
                 try {
@@ -170,10 +209,11 @@ NS_CC_BEGIN
                 }
             } catch (const char *ex) {
                 exceptionStack.push_back(
-                        ExceptionInfo{
-                                .msg = ex,
-                                .stackTrace = StackTrace{.depth = 0},
-                        }
+                    ExceptionInfo{
+                        .msg = ex,
+                        .jThrowable = nullptr,
+                        .stackTrace = StackTrace{.depth = 0},
+                    }
                 );
 
                 try {
@@ -184,10 +224,11 @@ NS_CC_BEGIN
                 }
             } catch (...) {
                 exceptionStack.push_back(
-                        ExceptionInfo{
-                                .msg = "Unknown exception",
-                                .stackTrace = StackTrace{.depth = 0},
-                        }
+                    ExceptionInfo{
+                        .msg = "Unknown exception",
+                        .jThrowable = nullptr,
+                        .stackTrace = StackTrace{.depth = 0},
+                    }
                 );
 
                 try {
@@ -204,12 +245,14 @@ NS_CC_BEGIN
         for (size_t idx = exceptionStack.size(); idx > 0; --idx) {
             size_t depth = idx - 1;
             const auto &exceptionInfo = exceptionStack[depth];
+
             javaException = createJavaException(
-                    env,
-                    exceptionInfo.msg.c_str(),
-                    exceptionInfo.stackTrace,
-                    javaException,
-                    depth == 0
+                env,
+                exceptionInfo.msg.c_str(),
+                exceptionInfo.jThrowable,
+                exceptionInfo.stackTrace,
+                javaException,
+                depth == 0
             );
         }
         return (jthrowable) env->PopLocalFrame(javaException);

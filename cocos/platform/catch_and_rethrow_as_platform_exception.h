@@ -1,6 +1,8 @@
 #ifndef __CCCATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION__
 #define __CCCATCH_AND_RETHROW_AS_PLATFORM_EXCEPTION__
 
+#include "CCPlatformConfig.h"
+
 #include "base/CCRuntimeError.h"
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
