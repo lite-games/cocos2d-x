@@ -154,8 +154,14 @@ namespace cocos2d {
             return false;
         }
 
+        if (JniHelper::classloader != nullptr) {
+            cocos2d::JniHelper::getEnv()->DeleteGlobalRef(JniHelper::classloader);
+        }
         JniHelper::classloader = cocos2d::JniHelper::getEnv()->NewGlobalRef(_c);
         JniHelper::loadclassMethod_methodID = _m.methodID;
+        if (JniHelper::_activity != nullptr) {
+            cocos2d::JniHelper::getEnv()->DeleteGlobalRef(JniHelper::_activity);
+        }
         JniHelper::_activity = cocos2d::JniHelper::getEnv()->NewGlobalRef(activityinstance);
         if (JniHelper::classloaderCallback != nullptr){
             JniHelper::classloaderCallback();
