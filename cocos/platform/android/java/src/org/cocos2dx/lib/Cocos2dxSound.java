@@ -82,7 +82,7 @@ public class Cocos2dxSound {
     // ===========================================================
 
     public Cocos2dxSound(final Context context) {
-        this.mContext = context;
+        this.mContext = context.getApplicationContext();
 
         this.initData();
     }
