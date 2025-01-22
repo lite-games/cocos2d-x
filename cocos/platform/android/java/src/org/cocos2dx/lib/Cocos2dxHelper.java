@@ -121,66 +121,61 @@ public class Cocos2dxHelper {
         ((Cocos2dxActivity)sActivity).runOnGLThread(r);
     }
 
-    private static boolean sInited = false;
     public static void init(final Activity activity) {
         sActivity = activity;
         Cocos2dxHelper.sCocos2dxHelperListener = (Cocos2dxHelperListener)activity;
-        if (!sInited) {
 
-            PackageManager pm = activity.getPackageManager();
-            boolean isSupportLowLatency = pm.hasSystemFeature(PackageManager.FEATURE_AUDIO_LOW_LATENCY);
+        PackageManager pm = activity.getPackageManager();
+        boolean isSupportLowLatency = pm.hasSystemFeature(PackageManager.FEATURE_AUDIO_LOW_LATENCY);
 
-            Log.d(TAG, "isSupportLowLatency:" + isSupportLowLatency);
+        Log.d(TAG, "isSupportLowLatency:" + isSupportLowLatency);
 
-            int sampleRate = 44100;
-            int bufferSizeInFrames = 192;
+        int sampleRate = 44100;
+        int bufferSizeInFrames = 192;
 
-            if (Build.VERSION.SDK_INT >= 17) {
-                AudioManager am = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
-                // use reflection to remove dependence of API 17 when compiling
+        if (Build.VERSION.SDK_INT >= 17) {
+            AudioManager am = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
+            // use reflection to remove dependence of API 17 when compiling
 
-                // AudioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
-                final Class audioManagerClass = AudioManager.class;
-                Object[] parameters = new Object[]{Cocos2dxReflectionHelper.<String>getConstantValue(audioManagerClass, "PROPERTY_OUTPUT_SAMPLE_RATE")};
-                final String strSampleRate = Cocos2dxReflectionHelper.<String>invokeInstanceMethod(am, "getProperty", new Class[]{String.class}, parameters);
+            // AudioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
+            final Class audioManagerClass = AudioManager.class;
+            Object[] parameters = new Object[]{Cocos2dxReflectionHelper.<String>getConstantValue(audioManagerClass, "PROPERTY_OUTPUT_SAMPLE_RATE")};
+            final String strSampleRate = Cocos2dxReflectionHelper.<String>invokeInstanceMethod(am, "getProperty", new Class[]{String.class}, parameters);
 
-                // AudioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
-                parameters = new Object[]{Cocos2dxReflectionHelper.<String>getConstantValue(audioManagerClass, "PROPERTY_OUTPUT_FRAMES_PER_BUFFER")};
-                final String strBufferSizeInFrames = Cocos2dxReflectionHelper.<String>invokeInstanceMethod(am, "getProperty", new Class[]{String.class}, parameters);
+            // AudioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
+            parameters = new Object[]{Cocos2dxReflectionHelper.<String>getConstantValue(audioManagerClass, "PROPERTY_OUTPUT_FRAMES_PER_BUFFER")};
+            final String strBufferSizeInFrames = Cocos2dxReflectionHelper.<String>invokeInstanceMethod(am, "getProperty", new Class[]{String.class}, parameters);
 
-                try {
-                    sampleRate = Integer.parseInt(strSampleRate);
-                    bufferSizeInFrames = Integer.parseInt(strBufferSizeInFrames);
-                } catch (NumberFormatException e) {
-                    Log.e(TAG, "parseInt failed", e);
-                }
-                Log.d(TAG, "sampleRate: " + sampleRate + ", framesPerBuffer: " + bufferSizeInFrames);
-            } else {
-                Log.d(TAG, "android version is lower than 17");
+            try {
+                sampleRate = Integer.parseInt(strSampleRate);
+                bufferSizeInFrames = Integer.parseInt(strBufferSizeInFrames);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "parseInt failed", e);
             }
-
-            nativeSetAudioDeviceInfo(isSupportLowLatency, sampleRate, bufferSizeInFrames);
-
-            final ApplicationInfo applicationInfo = activity.getApplicationInfo();
-            
-            Cocos2dxHelper.sPackageName = applicationInfo.packageName;
-
-            Cocos2dxHelper.sCocos2dMusic = new Cocos2dxMusic(activity);
-            Cocos2dxHelper.sAssetManager = activity.getAssets();
-            Cocos2dxHelper.nativeSetContext((Context)activity, Cocos2dxHelper.sAssetManager);
-    
-            Cocos2dxBitmap.setContext(activity);
-
-            Cocos2dxHelper.sVibrateService = (Vibrator)activity.getSystemService(Context.VIBRATOR_SERVICE);
-
-            sInited = true;
-            
-            //Enhance API modification begin
-            Intent serviceIntent = new Intent(IGameTuningService.class.getName());
-            serviceIntent.setPackage("com.enhance.gameservice");
-            boolean suc = activity.getApplicationContext().bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
-            //Enhance API modification end
+            Log.d(TAG, "sampleRate: " + sampleRate + ", framesPerBuffer: " + bufferSizeInFrames);
+        } else {
+            Log.d(TAG, "android version is lower than 17");
         }
+
+        nativeSetAudioDeviceInfo(isSupportLowLatency, sampleRate, bufferSizeInFrames);
+
+        final ApplicationInfo applicationInfo = activity.getApplicationInfo();
+
+        Cocos2dxHelper.sPackageName = applicationInfo.packageName;
+
+        Cocos2dxHelper.sCocos2dMusic = new Cocos2dxMusic(activity);
+        Cocos2dxHelper.sAssetManager = activity.getAssets();
+        Cocos2dxHelper.nativeSetContext((Context)activity, Cocos2dxHelper.sAssetManager);
+
+        Cocos2dxBitmap.setContext(activity);
+
+        Cocos2dxHelper.sVibrateService = (Vibrator)activity.getSystemService(Context.VIBRATOR_SERVICE);
+
+        //Enhance API modification begin
+        Intent serviceIntent = new Intent(IGameTuningService.class.getName());
+        serviceIntent.setPackage("com.enhance.gameservice");
+        boolean suc = activity.getApplicationContext().bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
+        //Enhance API modification end
     }
     
     // This function returns the absolute path to the OBB if it exists,
