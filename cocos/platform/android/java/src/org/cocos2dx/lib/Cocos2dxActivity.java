@@ -55,6 +55,7 @@ public abstract class Cocos2dxActivity extends FragmentActivity implements Cocos
     // ===========================================================
     // Constants
     // ===========================================================
+    public static final int FRAME_LAYOUT_ID = 1;
 
     private final static String TAG = Cocos2dxActivity.class.getSimpleName();
 
@@ -266,7 +267,7 @@ public abstract class Cocos2dxActivity extends FragmentActivity implements Cocos
 
         mFrameLayout = new ResizeLayout(this);
 
-        mFrameLayout.setId(View.generateViewId());
+        mFrameLayout.setId(FRAME_LAYOUT_ID);
 
         mFrameLayout.setLayoutParams(framelayout_params);
 
