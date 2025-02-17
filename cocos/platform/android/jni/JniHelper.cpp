@@ -24,6 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
 #include "platform/android/jni/JniHelper.h"
+#include "base/CCRuntimeError.h"
 #include <android/log.h>
 #include <string.h>
 #include <pthread.h>
@@ -130,20 +131,24 @@ namespace cocos2d {
         return _activity;
     }
 
-    bool JniHelper::setClassLoaderFrom(jobject activityinstance) {
+    void JniHelper::setClassLoaderFrom(jobject activityinstance) {
+        if (activityinstance == nullptr) {
+            throw RuntimeError("Activity instance is null");
+        }
+
         JniMethodInfo _getclassloaderMethod;
         if (!JniHelper::getMethodInfo_DefaultClassLoader(_getclassloaderMethod,
                                                          "android/content/Context",
                                                          "getClassLoader",
                                                          "()Ljava/lang/ClassLoader;")) {
-            return false;
+            throw RuntimeError("Failed to get Context.getClassLoader method info");
         }
 
         jobject _c = cocos2d::JniHelper::getEnv()->CallObjectMethod(activityinstance,
                                                                     _getclassloaderMethod.methodID);
 
         if (nullptr == _c) {
-            return false;
+            throw RuntimeError("Failed to get classloader from context");
         }
 
         JniMethodInfo _m;
@@ -151,23 +156,30 @@ namespace cocos2d {
                                                          "java/lang/ClassLoader",
                                                          "loadClass",
                                                          "(Ljava/lang/String;)Ljava/lang/Class;")) {
-            return false;
+            throw RuntimeError("Failed to get ClassLoader.loadClass method info");
         }
 
         if (JniHelper::classloader != nullptr) {
             cocos2d::JniHelper::getEnv()->DeleteGlobalRef(JniHelper::classloader);
         }
         JniHelper::classloader = cocos2d::JniHelper::getEnv()->NewGlobalRef(_c);
+        if (JniHelper::classloader == nullptr) {
+            throw RuntimeError("Creating class loader global ref failed");
+        }
+
         JniHelper::loadclassMethod_methodID = _m.methodID;
+
         if (JniHelper::_activity != nullptr) {
             cocos2d::JniHelper::getEnv()->DeleteGlobalRef(JniHelper::_activity);
         }
         JniHelper::_activity = cocos2d::JniHelper::getEnv()->NewGlobalRef(activityinstance);
-        if (JniHelper::classloaderCallback != nullptr){
-            JniHelper::classloaderCallback();
+        if (JniHelper::_activity == nullptr) {
+            throw RuntimeError("Creating activity global ref failed");
         }
 
-        return true;
+        if (JniHelper::classloaderCallback != nullptr) {
+            JniHelper::classloaderCallback();
+        }
     }
 
     bool JniHelper::getStaticMethodInfo(JniMethodInfo &methodinfo,

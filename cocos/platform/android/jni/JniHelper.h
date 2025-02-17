@@ -54,7 +54,7 @@ public:
     static JNIEnv* getEnv();
     static jobject getActivity();
 
-    static bool setClassLoaderFrom(jobject activityInstance);
+    static void setClassLoaderFrom(jobject activityInstance);
     static bool getStaticMethodInfo(JniMethodInfo &methodinfo,
                                     const char *className,
                                     const char *methodName,
