@@ -239,7 +239,14 @@ Rect GLViewImpl::getSafeAreaRect() const
     CCEAGLView *eaglview = (CCEAGLView*) _eaglview;
 
     if (@available(iOS 11.0, *)) {
-        UIEdgeInsets safeAreaInsetsInPoints = eaglview.safeAreaInsets;
+        // NOTE: Take safeAreaInsets from eaglview superview. @SafeArea -- mz, 2025-02-27
+        // eaglView doesn't have proper safeAreaInsets until RootViewController.viewDidLayoutSubviews is called.
+        // It can happen that getSafeAreaRect() is called before viewDidLayoutSubviews,
+        //   which results in bad layouts.
+        // Eaglview superview, on the other hand, has proper safeAreaInsets right from the start.
+        // Eaglview covers the whole area of its superview, so superview should have the same safeAreaInsets.
+        // Let's use eaglView superview safeAreaInstets.
+        UIEdgeInsets safeAreaInsetsInPoints = eaglview.superview.safeAreaInsets;
         CGFloat contentScaleFactor = eaglview.contentScaleFactor;
 
         UIEdgeInsets safeAreaInsetsInDesignPoints;
